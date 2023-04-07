@@ -3,15 +3,14 @@ This is a mock library for greptime, it provide same API as greptime, but it's n
 you can also use it to test your scripts locally first (but mock test is still in experiment phase),
 then upload them to the server for execution.
 '''
+from __future__ import annotations
 
+from typing import Literal
 import numpy as np
 from collections import OrderedDict
-try:
-    from future import __annotations__
-except ImportError:
-    # if you are using python 3.7 or above, you can remove this try-except block
-    pass
+
 import functools
+
 
 def coprocessor(args=None, returns=[], sql=None, backend="rspy"):
     '''The coprocessor function accept a python script and a Record Batch:
@@ -29,10 +28,13 @@ def coprocessor(args=None, returns=[], sql=None, backend="rspy"):
         return wrapper
     return decorator
 
+
 copr = coprocessor
 i128 = i64 = i32 = i16 = i8 = int
 u128 = u64 = u32 = u16 = u8 = int
 f64 = f32 = float
+
+
 class PyVector:
     '''This is the core class of the greptime library, it is a vector of elements, 
     in this mock library we are using numpy.ndarray to simulate it.'''
@@ -117,13 +119,118 @@ class PyVector:
         return PyVector(self.v | other.v)
 
 
-class PyDataFrame:
-    pass
-
-
 class PyExpr:
-    pass
+    def __call__(self) -> 'PyExpr':
+        return self
+    def alias(self, name: str) -> 'PyExpr':
+        '''Return self AS name alias expression'''
+        pass
+    def sort(asc: bool, nulls_first: bool) -> 'PyExpr':
+        '''Create a sort expression from an existing expression.'''
+        pass
 
+class PyDataFrame:
+    def from_sql(sql: str) -> 'PyDataFrame':
+        '''
+        This is a function that takes a SQL string and 
+        returns a `PyDataFrame` object constructed 
+        from the result of the SQL query.
+        '''
+        pass
+
+    def select_columns(self, columns: 'list[str]') -> 'PyDataFrame':
+        '''Filter the `PyDataFrame` by column. Returns a new DataFrame only containing the specified columns.
+        '''
+        pass
+
+    def select(self, expr_list: 'list[PyExpr]') -> 'PyDataFrame':
+        '''Filter a `PyDataFrame` to only include rows that match the specified filter expression.
+        '''
+        pass
+
+    def filter(self, predicate: PyExpr) -> 'PyDataFrame':
+        '''Filter a `PyDataFrame` to only include rows that match the specified filter expression.'''
+        pass
+
+    def aggregate(self, group_expr: 'list[PyExpr]', aggr_expr: 'list[PyExpr]') -> 'PyDataFrame':
+        '''
+        Filter the `PyDataFrame` by column. Returns a new `PyDataFrame` only containing the specified columns.
+        '''
+        pass
+
+    def limit(self, skip: int, fetch: int = None) -> 'PyDataFrame':
+        '''
+        Limit the number of rows returned from this `PyDataFrame`.
+
+        `skip` - Number of rows to skip before fetch any row
+
+        `fetch` - Maximum number of rows to fetch, after skipping `skip` rows.
+        '''
+        pass
+
+    def union(self, df: 'PyDataFrame') -> 'PyDataFrame':
+        '''
+        Calculate the union of two `PyDataFrame`, 
+        preserving duplicate rows.
+        The two `PyDataFrame` must have exactly the same schema
+        '''
+        pass
+    
+    def union_distinct(self, df: 'PyDataFrame') -> 'PyDataFrame':
+        '''
+        Calculate the distinct union of two `PyDataFrame`. 
+        The two `PyDataFrame` must have exactly the same schema
+        '''
+        pass
+
+    def distinct(self) -> 'PyDataFrame':
+        '''
+        Filter out duplicate rows
+        '''
+        pass
+
+    def sort(self, expr_list: 'list[PyExpr]') -> 'PyDataFrame':
+        '''
+        Sort the DataFrame by the specified sorting expressions. 
+        Any expression can be turned into a sort expression by calling its `sort` method.
+        '''
+        pass
+
+    def join(self, 
+             right: 'PyDataFrame', 
+             join_type: Literal["Inner", "Left", "Right", "Full", "LeftSemi", "LeftAnti", "RightSemi", "RightAnti"], 
+             left_cols: 'list[str]', 
+             right_cols: 'list[str]',
+             filter: 'PyExpr' = None) -> 'PyDataFrame':
+        '''
+        Join this DataFrame with another DataFrame using the specified columns as join keys.
+        Filter expression expected to contain non-equality predicates 
+        that can not be pushed down to any of join inputs. 
+        In case of outer join, filter applied to only matched rows.'''
+        pass
+
+    def intersect(self, df: 'PyDataFrame') -> 'PyDataFrame':
+        '''
+        Calculate the intersection of two DataFrames. 
+        The two DataFrames must have exactly the same schema
+        '''
+        pass
+    
+    def except_df(self, df: 'PyDataFrame') -> 'PyDataFrame':
+        '''
+        Calculate the exception of two DataFrames. 
+        The two DataFrames must have exactly the same schema
+        '''
+        pass
+
+    def collect(self) -> 'PyRecordBatch':
+        '''Collect the PyDataFrame into a PyRecordBatch
+        ## How it work:
+        Convert the logical plan represented by this DataFrame into a physical plan and execute it, 
+        collecting all resulting batches into memory Executes this DataFrame and 
+        collects all results into a vector of RecordBatch.
+        '''
+        pass
 
 class PyRecordBatch:
     '''This is a Wrapper around a RecordBatch, 

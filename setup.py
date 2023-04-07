@@ -12,10 +12,10 @@ setuptools.setup(
     description="A mock test library for greptimedb's scripting feature",
     long_description=long_desc,
     long_description_content_type="text/markdown",
-    url="https://github.com/GreptimeTeam/greptimedb",
+    url="https://github.com/GreptimeTeam/greptime_py_mock",
     # project_urls is optional
     project_urls={
-        "Bug Tracker": "https://github.com/GreptimeTeam/greptimedb/issues",
+        "Bug Tracker": "https://github.com/GreptimeTeam/greptime_py_mock/issues",
     },
     key_words="greptime",
     install_requires=required,
